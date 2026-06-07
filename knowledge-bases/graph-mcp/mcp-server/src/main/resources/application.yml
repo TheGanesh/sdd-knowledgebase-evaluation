@@ -1,0 +1,29 @@
+server:
+  port: 3002
+
+spring:
+  application:
+    name: catalog-mcp
+  ai:
+    mcp:
+      server:
+        name: service-catalog
+        version: 0.1.0
+        type: SYNC
+        # WebMVC SSE transport — endpoints below match the Windsurf mcp_config url.
+        sse-endpoint: /sse
+        sse-message-endpoint: /mcp/message
+        instructions: >
+          Service catalog for cross-service impact analysis. Use list_services/search_services
+          to find entry points, get_dependents/impact_report to compute who is affected, and
+          get_api for request/response detail. The catalog is rebuilt weekly from code.
+
+# Root of the service-catalog (contains generated/ and services/). When run from this module's
+# directory `..` resolves to service-catalog/. Override with CATALOG_ROOT for jar deployments.
+catalog:
+  root: ${CATALOG_ROOT:..}
+
+logging:
+  level:
+    root: WARN
+    com.ganesh.catalog: INFO

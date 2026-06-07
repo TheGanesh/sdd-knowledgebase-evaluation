@@ -1,0 +1,9 @@
+{
+  "id": "KB-203",
+  "pattern": "Kafka schema change (consumer discovery)",
+  "services": ["order-service", "inventory-service"],
+  "apis": [],
+  "topics": ["order.created"],
+  "datastores": [],
+  "rationale": "order-service produces order.created; inventory-service CONSUMES it. The only way to know inventory is affected is to look up who consumes the topic — invisible from order-service's prose alone."
+}

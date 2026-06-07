@@ -1,0 +1,114 @@
+{
+  "story": "llm-as-judge/tasks/KB-201/story.md (representative; behaviour generalised across KB-201..206)",
+  "mode": "pairwise",
+  "options": {
+    "a": "markdown",
+    "b": "graph-rag",
+    "c": "graph-mcp"
+  },
+  "overall": {
+    "winner": "c",
+    "ranking": ["c", "b", "a"],
+    "scores": { "a": 0.67, "b": 0.74, "c": 0.97 },
+    "margin": 0.23,
+    "recommend_human_review": false,
+    "summary": "Graph+MCP (c) wins decisively: it computes impact by traversing the dependency graph, so it leads on completeness, contract precision, and determinism, and never over-claims. Markdown (a) is the most readable and never invents impact, but misses non-local effects (consumers of changed events, callers of changed APIs). Graph-RAG (b) sits in the middle — graph expansion recovers the edges Markdown misses, but it over-expands on single-service changes and its contracts are paraphrased."
+  },
+  "groups": [
+    {
+      "name": "impact_completeness",
+      "weight": 0.35,
+      "winner": "c",
+      "scores": { "a": 0.65, "b": 0.90, "c": 1.00 },
+      "criteria": [
+        {
+          "id": "G1",
+          "scores": { "a": 0.65, "b": 0.90, "c": 1.00 },
+          "confidence": "high",
+          "evidence": [
+            "graph-mcp: get_dependents('topic:order.created') -> [inventory-service]; names it as the consumer that must accept reservedQty (AC3).",
+            "graph-rag: the retrieved order.created chunk lists producer order-service and consumer inventory-service, so the consumer is surfaced.",
+            "markdown: hedges the consumer ('inventory-service's page also says it consumes order.created, so it may need to handle the new field — please confirm') — per the rubric a hedge counts as not-claimed."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "scope_precision",
+      "weight": 0.20,
+      "winner": "tie",
+      "scores": { "a": 1.00, "b": 0.70, "c": 1.00 },
+      "criteria": [
+        {
+          "id": "G2",
+          "scores": { "a": 1.00, "b": 0.70, "c": 1.00 },
+          "confidence": "high",
+          "evidence": [
+            "markdown: never claims an unaffected service; on single-service tasks (KB-202 quantity cap, KB-205 cache TTL) it correctly stays within order-service / inventory-service respectively.",
+            "graph-mcp: returns no cross-service dependents for isolated changes — also correctly scoped.",
+            "graph-rag: 1-hop graph expansion drags the neighbouring service into single-service changes (KB-202, KB-205) — a false positive each."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "contract_precision",
+      "weight": 0.15,
+      "winner": "c",
+      "scores": { "a": 0.40, "b": 0.60, "c": 1.00 },
+      "criteria": [
+        {
+          "id": "G3",
+          "scores": { "a": 0.40, "b": 0.60, "c": 1.00 },
+          "confidence": "high",
+          "evidence": [
+            "graph-mcp: exact schemas from get_api — CreateOrderRequest{customerId,sku,quantity} -> OrderResponse(+reservationId), plus ReserveRequest/ReserveResponse.",
+            "graph-rag: schemas paraphrased from chunk text ('create-order request -> order response') — not exact.",
+            "markdown: request/response described in words only, no schema names or examples."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "determinism",
+      "weight": 0.20,
+      "winner": "c",
+      "scores": { "a": 0.40, "b": 0.60, "c": 1.00 },
+      "criteria": [
+        {
+          "id": "G4",
+          "scores": { "a": 0.40, "b": 0.60, "c": 1.00 },
+          "confidence": "high",
+          "evidence": [
+            "graph-mcp: a reverse-graph lookup returns the identical impact set on every run.",
+            "graph-rag: retrieval depends on k and query phrasing; the surfaced set can vary.",
+            "markdown: depends entirely on which pages the reader chooses to open."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "spec_usability",
+      "weight": 0.10,
+      "winner": "a",
+      "scores": { "a": 1.00, "b": 0.70, "c": 0.70 },
+      "criteria": [
+        {
+          "id": "G5",
+          "scores": { "a": 1.00, "b": 0.70, "c": 0.70 },
+          "confidence": "med",
+          "evidence": [
+            "markdown: plain prose a human reads instantly, zero infrastructure.",
+            "graph-mcp / graph-rag: structured and precise, but require a running MCP server to produce."
+          ]
+        }
+      ]
+    }
+  ],
+  "order_sensitive_criteria": [],
+  "risks": [
+    "markdown: low recall on non-local impact — misses consumers of changed topics (KB-203) and callers of changed APIs (KB-204); the gap widens at 40 services.",
+    "graph-rag: over-expansion adds false positives on single-service changes; contracts are approximate; retrieval is non-deterministic.",
+    "graph-mcp: requires a built graph and a running MCP server (operational cost) — the price of the deterministic win."
+  ]
+}

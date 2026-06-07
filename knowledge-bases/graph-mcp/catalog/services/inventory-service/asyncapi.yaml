@@ -1,0 +1,54 @@
+asyncapi: 3.0.0
+info:
+  title: inventory-service events
+  version: 0.1.0
+  description: Kafka channels produced/consumed by inventory-service.
+servers:
+  kafka:
+    host: localhost:9092
+    protocol: kafka
+channels:
+  order.created:
+    address: order.created
+    messages:
+      OrderCreatedEvent:
+        $ref: '#/components/messages/OrderCreatedEvent'
+  inventory.reserved:
+    address: inventory.reserved
+    messages:
+      InventoryReservedEvent:
+        $ref: '#/components/messages/InventoryReservedEvent'
+operations:
+  consumeOrderCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/order.created'
+    summary: Reconcile reservations against orders (consumes order.created from order-service).
+  publishInventoryReserved:
+    action: send
+    channel:
+      $ref: '#/channels/inventory.reserved'
+    summary: Emitted after a successful reservation.
+components:
+  messages:
+    OrderCreatedEvent:
+      name: OrderCreatedEvent
+      payload:
+        type: object
+        properties:
+          orderId: { type: integer, format: int64 }
+          customerId: { type: integer, format: int64 }
+          sku: { type: string }
+          quantity: { type: integer }
+          reservedQty: { type: integer }
+          occurredAt: { type: string, format: date-time }
+    InventoryReservedEvent:
+      name: InventoryReservedEvent
+      payload:
+        type: object
+        properties:
+          reservationId: { type: string }
+          sku: { type: string }
+          quantity: { type: integer }
+          orderId: { type: integer, format: int64 }
+          occurredAt: { type: string, format: date-time }

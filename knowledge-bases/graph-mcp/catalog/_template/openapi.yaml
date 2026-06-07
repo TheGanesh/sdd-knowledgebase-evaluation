@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info:
+  title: <service-name> API
+  version: 0.1.0
+  description: Inbound REST contract — harvested from springdoc /v3/api-docs by the extractor.
+servers:
+  - url: http://localhost:<port>
+paths: {}
+components:
+  schemas: {}

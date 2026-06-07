@@ -1,0 +1,9 @@
+{
+  "id": "KB-206",
+  "pattern": "new event subscription (producer discovery)",
+  "services": ["order-service", "inventory-service"],
+  "apis": [],
+  "topics": ["inventory.reserved"],
+  "datastores": ["db:orders"],
+  "rationale": "order-service becomes a new consumer of inventory.reserved (the changed service); inventory-service is the producer of that topic, so it is the relevant counterpart. The producer is discoverable only by looking up the topic — inventory.reserved currently has no consumers in the KB."
+}

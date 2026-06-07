@@ -1,0 +1,9 @@
+{
+  "id": "KB-201",
+  "pattern": "cross-service REST + Kafka consumer",
+  "services": ["order-service", "inventory-service"],
+  "apis": ["order-service POST /api/orders", "inventory-service POST /api/inventory/reserve"],
+  "topics": ["order.created"],
+  "datastores": ["db:reservations", "cache:sku-availability"],
+  "rationale": "order POST adds the reserve call + reservedQty; inventory provides reserve and CONSUMES order.created, so its consumer must accept the new field."
+}

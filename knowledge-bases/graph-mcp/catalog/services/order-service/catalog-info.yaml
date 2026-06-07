@@ -1,0 +1,67 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: order-service
+  description: Creates customer orders, reserves stock in inventory-service, and emits order.created.
+  annotations:
+    catalog.ganesh.dev/openapi: ./openapi.yaml
+    catalog.ganesh.dev/asyncapi: ./asyncapi.yaml
+spec:
+  type: service
+  lifecycle: production
+  owner: team-ordering
+  system: commerce
+  domain: ordering
+
+  # --- standard Backstage relations (drive the dependency graph) ---
+  providesApis:
+    - order-service-rest
+  consumesApis:
+    - inventory-service-rest
+  dependsOn:
+    - resource:db/orders
+    - resource:cache/plans
+    - resource:topic/order.created
+
+  # --- catalog extension: operation/topic/datastore detail for impact analysis ---
+  x-catalog:
+    inboundApis:
+      - operationId: createOrder
+        method: POST
+        path: /api/orders
+        summary: Create an order and synchronously reserve stock.
+        requestSchema: CreateOrderRequest
+        responseSchema: OrderResponse
+        errors:
+          - "409 OUT_OF_STOCK"
+          - "404 NOT_FOUND"
+      - operationId: getOrder
+        method: GET
+        path: /api/orders/{id}
+        summary: Fetch an order by id.
+        responseSchema: OrderResponse
+        errors:
+          - "404 NOT_FOUND"
+    outboundApis:
+      - targetService: inventory-service
+        operationId: reserveInventory
+        method: POST
+        path: /api/inventory/reserve
+        requestSchema: ReserveRequest
+        responseSchema: ReserveResponse
+        callSite: com.ganesh.commerce.order.client.InventoryClient#reserve
+    topicsProduced:
+      - topic: order.created
+        messageSchema: OrderCreatedEvent
+    topicsConsumed: []
+    datastores:
+      - kind: db
+        name: orders
+        engine: postgres
+        tables:
+          - orders
+      - kind: cache
+        name: plans
+        engine: caffeine
+        regions:
+          - plans

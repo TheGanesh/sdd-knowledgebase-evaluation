@@ -1,0 +1,109 @@
+openapi: 3.1.0
+info:
+  title: inventory-service API
+  version: 0.1.0
+  description: Inbound REST contract harvested from springdoc /v3/api-docs.
+servers:
+  - url: http://localhost:8082
+paths:
+  /api/inventory/{sku}:
+    get:
+      operationId: getInventory
+      summary: Read current available stock for a SKU.
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current stock.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryResponse'
+              example:
+                sku: IPHONE-15-PRO
+                availableQuantity: 25
+        '404':
+          description: Unknown SKU (code NOT_FOUND).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/inventory/reserve:
+    post:
+      operationId: reserveInventory
+      summary: Reserve stock for an order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReserveRequest'
+            example:
+              sku: IPHONE-15-PRO
+              quantity: 1
+              orderId: 1001
+      responses:
+        '200':
+          description: Reservation result. available=false means insufficient stock.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReserveResponse'
+              examples:
+                reserved:
+                  value:
+                    reservationId: 7b3f...-resv
+                    sku: IPHONE-15-PRO
+                    reservedQuantity: 1
+                    available: true
+                outOfStock:
+                  value:
+                    reservationId: null
+                    sku: NOKIA-G22
+                    reservedQuantity: 0
+                    available: false
+components:
+  schemas:
+    ReserveRequest:
+      type: object
+      required: [sku, quantity]
+      properties:
+        sku:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        orderId:
+          type: integer
+          format: int64
+          nullable: true
+    ReserveResponse:
+      type: object
+      properties:
+        reservationId:
+          type: string
+          nullable: true
+        sku:
+          type: string
+        reservedQuantity:
+          type: integer
+        available:
+          type: boolean
+    InventoryResponse:
+      type: object
+      properties:
+        sku:
+          type: string
+        availableQuantity:
+          type: integer
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string

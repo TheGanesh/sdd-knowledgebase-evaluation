@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2f7d4f"/>
+    </marker>
+    <style>
+      .t{ font-size:15px; font-weight:700; fill:#1f2a37 }
+      .s{ font-size:11.5px; fill:#6b7787 }
+      .panelT{ font-size:13px; font-weight:700; letter-spacing:.5px }
+      .panelS{ font-size:11px; fill:#8a97a6 }
+      .lbl{ font-size:11px; fill:#475569 }
+      .box{ fill:#ffffff; stroke:#b9c4d0; stroke-width:1.5 }
+      .edge{ stroke:#64748b; stroke-width:2; fill:none }
+    </style>
+  </defs>
+  <rect width="1080" height="600" fill="#ffffff"/>
+  <text x="40" y="36" font-size="20" font-weight="700" fill="#1f2a37">One catalog, built once — then read three ways</text>
+  <text x="40" y="56" class="s">Scan the services once into a structured catalog; build all three knowledge bases from it. The test isolates the access mode, not the data.</text>
+
+  <!-- BUILD panel -->
+  <rect x="20" y="74" width="1040" height="190" rx="14" fill="#eef2f7" stroke="#d3dbe6"/>
+  <text x="40" y="100" class="panelT" fill="#3b4a5a">BUILD · offline · from the code</text>
+  <text x="40" y="118" class="panelS">scan the services once; everything downstream is generated</text>
+  <g>
+    <rect class="box" x="40" y="138" width="160" height="76" rx="10"/>
+    <text x="120" y="172" text-anchor="middle" class="t">Microservices</text>
+    <text x="120" y="192" text-anchor="middle" class="s">order + inventory</text>
+
+    <rect class="box" x="236" y="138" width="160" height="76" rx="10"/>
+    <text x="316" y="166" text-anchor="middle" class="t">Extractor</text>
+    <text x="316" y="184" text-anchor="middle" class="s">JavaParser scan</text>
+    <text x="316" y="200" text-anchor="middle" class="s">+ OpenAPI harvest</text>
+
+    <rect class="box" x="432" y="138" width="160" height="76" rx="10"/>
+    <text x="512" y="166" text-anchor="middle" class="t">Descriptors</text>
+    <text x="512" y="184" text-anchor="middle" class="s">catalog-info · openapi</text>
+    <text x="512" y="200" text-anchor="middle" class="s">· asyncapi</text>
+
+    <rect class="box" x="628" y="138" width="160" height="76" rx="10"/>
+    <text x="708" y="166" text-anchor="middle" class="t">Graph-builder</text>
+    <text x="708" y="184" text-anchor="middle" class="s">validate vs schema</text>
+    <text x="708" y="200" text-anchor="middle" class="s">+ build the graph</text>
+
+    <rect class="box" x="824" y="138" width="216" height="76" rx="10" stroke="#2f7d4f"/>
+    <text x="932" y="164" text-anchor="middle" class="t">Catalog</text>
+    <text x="932" y="182" text-anchor="middle" class="s">graph.json · reverse-index.json</text>
+    <text x="932" y="198" text-anchor="middle" class="s">the shared source of truth</text>
+
+    <line class="edge" x1="200" y1="176" x2="232" y2="176" marker-end="url(#arrow)"/>
+    <line class="edge" x1="396" y1="176" x2="428" y2="176" marker-end="url(#arrow)"/>
+    <line class="edge" x1="592" y1="176" x2="624" y2="176" marker-end="url(#arrow)"/>
+    <line class="edge" x1="788" y1="176" x2="820" y2="176" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- connector -->
+  <line x1="932" y1="214" x2="932" y2="372" stroke="#2f7d4f" stroke-width="2.5" stroke-dasharray="6 5" fill="none" marker-end="url(#arrowGreen)"/>
+  <text x="946" y="300" class="lbl" fill="#2f7d4f">the same catalog feeds</text>
+  <text x="946" y="316" class="lbl" fill="#2f7d4f">all three KBs</text>
+
+  <!-- THREE KBs panel -->
+  <rect x="20" y="330" width="1040" height="232" rx="14" fill="#eef6ef" stroke="#cfe3d3"/>
+  <text x="40" y="356" class="panelT" fill="#2f5d3f">THREE KNOWLEDGE BASES · the agent reads one of these</text>
+  <text x="40" y="374" class="panelS">same facts, three access modes</text>
+
+  <rect class="box" x="40" y="402" width="300" height="84" rx="10"/>
+  <text x="190" y="432" text-anchor="middle" class="t">Markdown</text>
+  <text x="190" y="452" text-anchor="middle" class="s">generated prose pages</text>
+  <text x="190" y="470" text-anchor="middle" class="s">the agent reads them</text>
+
+  <rect class="box" x="390" y="402" width="300" height="84" rx="10" stroke="#2563eb"/>
+  <text x="540" y="432" text-anchor="middle" class="t">Graph-RAG</text>
+  <text x="540" y="452" text-anchor="middle" class="s">rag-mcp :3003 · local embeddings</text>
+  <text x="540" y="470" text-anchor="middle" class="s">semantic search + 1-hop graph</text>
+
+  <rect class="box" x="740" y="402" width="300" height="84" rx="10" stroke="#2f7d4f"/>
+  <text x="890" y="432" text-anchor="middle" class="t">Graph + MCP</text>
+  <text x="890" y="452" text-anchor="middle" class="s">catalog-mcp :3002 · @Tool</text>
+  <text x="890" y="470" text-anchor="middle" class="s">get_dependents · impact_report</text>
+
+  <text x="40" y="540" class="s">Source of truth = the structured catalog. Markdown is a generated view of it (never drifts).</text>
+</svg>

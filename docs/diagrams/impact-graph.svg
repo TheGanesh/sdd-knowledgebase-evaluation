@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 560" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="aAmber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#b45309"/>
+    </marker>
+    <style>.mono{ font-family:'SF Mono','Menlo','Consolas',monospace }</style>
+  </defs>
+
+  <rect width="980" height="560" fill="#ffffff"/>
+  <text x="40" y="38" font-size="20" font-weight="700" fill="#1f2a37">Impact analysis is a graph lookup, not a guess</text>
+  <text x="40" y="58" font-size="12" fill="#6b7787">Two services and the two links between them — and exactly what the catalog returns for each.</text>
+
+  <!-- REST edge -->
+  <text x="490" y="120" text-anchor="middle" font-size="12" fill="#334155">REST call · <tspan class="mono">POST /api/inventory/reserve</tspan></text>
+  <line x1="372" y1="150" x2="608" y2="150" stroke="#475569" stroke-width="2.5" marker-end="url(#a)"/>
+
+  <!-- order-service node -->
+  <rect x="50" y="132" width="322" height="196" rx="12" fill="#f8fbff" stroke="#2563eb" stroke-width="2"/>
+  <text x="72" y="160" font-size="16" font-weight="700" fill="#1e40af">order-service</text>
+  <text x="72" y="186" class="mono" font-size="11.5" fill="#334155">Inbound:  POST /api/orders</text>
+  <text x="72" y="205" class="mono" font-size="11.5" fill="#334155">          GET  /api/orders/{id}</text>
+  <text x="72" y="224" class="mono" font-size="11.5" fill="#334155">Outbound: → inventory reserve</text>
+  <text x="72" y="248" class="mono" font-size="11.5" fill="#64748b">DB: orders   ·   Cache: plans</text>
+  <text x="72" y="272" class="mono" font-size="11.5" fill="#b45309">Produces: order.created</text>
+
+  <!-- inventory-service node -->
+  <rect x="608" y="132" width="322" height="196" rx="12" fill="#f1fbf8" stroke="#0f766e" stroke-width="2"/>
+  <text x="630" y="160" font-size="16" font-weight="700" fill="#0f5e54">inventory-service</text>
+  <text x="630" y="186" class="mono" font-size="11.5" fill="#334155">Inbound: GET  /api/inventory/{sku}</text>
+  <text x="630" y="205" class="mono" font-size="11.5" fill="#334155">         POST /api/inventory/reserve</text>
+  <text x="630" y="229" class="mono" font-size="11.5" fill="#64748b">DB: inventory, reservations</text>
+  <text x="630" y="248" class="mono" font-size="11.5" fill="#64748b">Cache: sku-availability</text>
+  <text x="630" y="272" class="mono" font-size="11.5" fill="#b45309">Consumes: order.created</text>
+  <text x="630" y="291" class="mono" font-size="11.5" fill="#b45309">Produces: inventory.reserved</text>
+
+  <!-- Kafka edge through topic pill -->
+  <text x="385" y="312" font-size="11" fill="#9a6a18">produces</text>
+  <text x="552" y="312" font-size="11" fill="#9a6a18">consumes</text>
+  <line x1="372" y1="320" x2="426" y2="320" stroke="#b45309" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#aAmber)"/>
+  <rect x="428" y="304" width="124" height="32" rx="16" fill="#fffbeb" stroke="#b45309"/>
+  <text x="490" y="325" text-anchor="middle" class="mono" font-size="12" fill="#92400e">order.created</text>
+  <line x1="554" y1="320" x2="608" y2="320" stroke="#b45309" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#aAmber)"/>
+
+  <!-- Callout A: REST dependency -->
+  <rect x="50" y="372" width="420" height="158" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <rect x="50" y="372" width="6" height="158" rx="3" fill="#2563eb"/>
+  <text x="74" y="398" font-size="13" font-weight="700" fill="#1e40af">Impact query — REST dependency</text>
+  <text x="74" y="424" class="mono" font-size="11.5" fill="#334155">get_dependents(</text>
+  <text x="74" y="442" class="mono" font-size="11.5" fill="#334155">  "api:inventory-service/</text>
+  <text x="74" y="460" class="mono" font-size="11.5" fill="#334155">   POST /api/inventory/reserve")</text>
+  <text x="74" y="482" class="mono" font-size="11.5" fill="#0f766e">→ consumers: ["order-service"]</text>
+  <text x="74" y="512" font-size="11.5" font-style="italic" fill="#475569">Change the reserve API ⇒ order-service is affected.</text>
+
+  <!-- Callout B: Kafka event -->
+  <rect x="510" y="372" width="420" height="158" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <rect x="510" y="372" width="6" height="158" rx="3" fill="#0f766e"/>
+  <text x="534" y="398" font-size="13" font-weight="700" fill="#0f5e54">Impact query — Kafka event</text>
+  <text x="534" y="424" class="mono" font-size="11.5" fill="#334155">get_dependents("topic:order.created")</text>
+  <text x="534" y="448" class="mono" font-size="11.5" fill="#334155">→ producers: ["order-service"]</text>
+  <text x="534" y="468" class="mono" font-size="11.5" fill="#0f766e">→ consumers: ["inventory-service"]</text>
+  <text x="534" y="500" font-size="11.5" font-style="italic" fill="#475569">Change order.created ⇒ inventory-service</text>
+  <text x="534" y="516" font-size="11.5" font-style="italic" fill="#475569">consumer must update (the COMM-201 risk).</text>
+</svg>

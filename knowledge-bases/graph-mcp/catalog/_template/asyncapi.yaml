@@ -1,0 +1,13 @@
+asyncapi: 3.0.0
+info:
+  title: <service-name> events
+  version: 0.1.0
+  description: Kafka channels produced/consumed — harvested from @KafkaListener/KafkaTemplate.
+servers:
+  kafka:
+    host: localhost:9092
+    protocol: kafka
+channels: {}
+operations: {}
+components:
+  messages: {}

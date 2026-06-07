@@ -1,0 +1,34 @@
+services:
+- name: "inventory-service"
+  summary: "Tracks stock per SKU, reserves stock on request, consumes order.created\
+    \ and emits inventory.reserved."
+  system: "commerce"
+  domain: "fulfillment"
+  apis:
+  - "GET /api/inventory/{sku} — Read current available stock for a SKU (cached)."
+  - "POST /api/inventory/reserve — Reserve stock for an order; returns available=false\
+    \ when insufficient."
+  topicsProduced:
+  - "inventory.reserved"
+  topicsConsumed:
+  - "order.created"
+  outboundTo: []
+  datastores:
+  - "db:inventory"
+  - "cache:sku-availability"
+- name: "order-service"
+  summary: "Creates customer orders, reserves stock in inventory-service, and emits\
+    \ order.created."
+  system: "commerce"
+  domain: "ordering"
+  apis:
+  - "POST /api/orders — Create an order and synchronously reserve stock."
+  - "GET /api/orders/{id} — Fetch an order by id."
+  topicsProduced:
+  - "order.created"
+  topicsConsumed: []
+  outboundTo:
+  - "inventory-service"
+  datastores:
+  - "db:orders"
+  - "cache:plans"

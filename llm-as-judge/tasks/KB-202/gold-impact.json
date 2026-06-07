@@ -1,0 +1,9 @@
+{
+  "id": "KB-202",
+  "pattern": "single-service (precision)",
+  "services": ["order-service"],
+  "apis": ["order-service POST /api/orders"],
+  "topics": [],
+  "datastores": [],
+  "rationale": "A request-validation rule on POST /api/orders. No outbound call changes, no event change — inventory-service is NOT affected. Over-claiming inventory is a precision error."
+}

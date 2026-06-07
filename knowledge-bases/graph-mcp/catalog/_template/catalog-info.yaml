@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: <service-name>            # kebab-case, must match folder name
+  description: <one line: what it owns + who it talks to>
+  annotations:
+    catalog.ganesh.dev/openapi: ./openapi.yaml
+    catalog.ganesh.dev/asyncapi: ./asyncapi.yaml
+spec:
+  type: service
+  lifecycle: production           # experimental | production | deprecated
+  owner: <team>
+  system: <system>
+  domain: <domain>
+
+  providesApis:
+    - <service-name>-rest
+  consumesApis: []                # names of APIs this service calls
+  dependsOn: []                   # resource:db/<name> | resource:cache/<name> | resource:topic/<name>
+
+  x-catalog:
+    inboundApis:
+      - operationId: <op>
+        method: GET               # GET|POST|PUT|PATCH|DELETE
+        path: /api/<resource>
+        summary: <one line>
+        requestSchema: <SchemaName>     # omit for GET/DELETE
+        responseSchema: <SchemaName>    # REQUIRED (completeness gate)
+        errors: []
+    outboundApis: []              # { targetService, method, path, requestSchema, responseSchema, callSite }
+    topicsProduced: []            # { topic, messageSchema }
+    topicsConsumed: []            # { topic, messageSchema }
+    datastores: []                # { kind: db|cache, name, engine, tables[]|regions[] }

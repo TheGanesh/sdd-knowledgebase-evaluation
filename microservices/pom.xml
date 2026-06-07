@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Aggregator pom — builds both demo services with one command:
+       mvn -f microservices/pom.xml -q -DskipTests package
+     Each service keeps its own spring-boot-starter-parent; this only groups them. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ganesh.commerce</groupId>
+    <artifactId>microservices</artifactId>
+    <version>0.1.0</version>
+    <packaging>pom</packaging>
+    <name>microservices</name>
+    <description>Demo Spring Boot services used only to BUILD the knowledge bases (offline) and to
+        label ground truth. The feature-to-story workflow never reads this module.</description>
+    <modules>
+        <module>order-service</module>
+        <module>inventory-service</module>
+    </modules>
+</project>

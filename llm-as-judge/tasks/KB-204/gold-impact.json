@@ -1,0 +1,9 @@
+{
+  "id": "KB-204",
+  "pattern": "provider API change (caller discovery)",
+  "services": ["inventory-service", "order-service"],
+  "apis": ["inventory-service POST /api/inventory/reserve", "order-service POST /api/orders"],
+  "topics": [],
+  "datastores": [],
+  "rationale": "inventory-service changes the reserve response; order-service is the caller and must read the new field. Knowing order-service is affected requires looking up who CALLS reserve — invisible from inventory-service's prose alone."
+}

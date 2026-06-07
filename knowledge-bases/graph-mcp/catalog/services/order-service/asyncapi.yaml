@@ -1,0 +1,53 @@
+asyncapi: 3.0.0
+info:
+  title: order-service events
+  version: 0.1.0
+  description: Kafka channels produced/consumed by order-service.
+servers:
+  kafka:
+    host: localhost:9092
+    protocol: kafka
+channels:
+  order.created:
+    address: order.created
+    messages:
+      OrderCreatedEvent:
+        $ref: '#/components/messages/OrderCreatedEvent'
+operations:
+  publishOrderCreated:
+    action: send
+    channel:
+      $ref: '#/channels/order.created'
+    summary: Emitted after an order is created and stock reserved.
+components:
+  messages:
+    OrderCreatedEvent:
+      name: OrderCreatedEvent
+      payload:
+        type: object
+        properties:
+          orderId:
+            type: integer
+            format: int64
+          customerId:
+            type: integer
+            format: int64
+          sku:
+            type: string
+          quantity:
+            type: integer
+          reservedQty:
+            type: integer
+            description: Quantity confirmed reserved by inventory-service (added in COMM-201).
+          occurredAt:
+            type: string
+            format: date-time
+      examples:
+        - name: created
+          payload:
+            orderId: 1001
+            customerId: 1
+            sku: IPHONE-15-PRO
+            quantity: 1
+            reservedQty: 1
+            occurredAt: "2026-06-06T12:00:00Z"

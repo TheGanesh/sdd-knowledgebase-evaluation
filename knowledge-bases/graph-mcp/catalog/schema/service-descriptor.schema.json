@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://catalog.ganesh.dev/schemas/service-descriptor.schema.json",
+  "title": "Service Catalog Descriptor (catalog-info.yaml)",
+  "description": "Normalized, Backstage-flavored descriptor for one microservice. The weekly extractor emits one of these per service; the graph-builder reads them to compute the dependency graph and reverse impact index. Standard OpenAPI/AsyncAPI files live alongside and carry the full request/response detail.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": { "const": "backstage.io/v1alpha1" },
+    "kind": { "const": "Component" },
+    "metadata": {
+      "type": "object",
+      "required": ["name", "description"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "description": { "type": "string", "minLength": 1 },
+        "annotations": {
+          "type": "object",
+          "properties": {
+            "catalog.ganesh.dev/openapi": { "type": "string" },
+            "catalog.ganesh.dev/asyncapi": { "type": "string" }
+          }
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["type", "lifecycle", "owner", "system", "domain", "x-catalog"],
+      "properties": {
+        "type": { "const": "service" },
+        "lifecycle": { "enum": ["experimental", "production", "deprecated"] },
+        "owner": { "type": "string" },
+        "system": { "type": "string" },
+        "domain": { "type": "string" },
+        "providesApis": { "type": "array", "items": { "type": "string" } },
+        "consumesApis": { "type": "array", "items": { "type": "string" } },
+        "dependsOn": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^resource:(db|cache|topic)/.+$" }
+        },
+        "x-catalog": {
+          "type": "object",
+          "description": "Operation/topic/datastore detail used for cross-service impact analysis.",
+          "required": ["inboundApis", "outboundApis", "topicsProduced", "topicsConsumed", "datastores"],
+          "properties": {
+            "inboundApis": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/inboundApi" }
+            },
+            "outboundApis": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/outboundApi" }
+            },
+            "topicsProduced": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/topicRef" }
+            },
+            "topicsConsumed": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/topicRef" }
+            },
+            "datastores": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/datastore" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "inboundApi": {
+      "type": "object",
+      "description": "An inbound REST operation. responseSchema is required so the catalog can never silently omit a contract (the completeness guarantee markdown lacked).",
+      "required": ["operationId", "method", "path", "summary", "responseSchema"],
+      "properties": {
+        "operationId": { "type": "string" },
+        "method": { "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+        "path": { "type": "string", "pattern": "^/" },
+        "summary": { "type": "string" },
+        "requestSchema": { "type": "string" },
+        "responseSchema": { "type": "string" },
+        "errors": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "outboundApi": {
+      "type": "object",
+      "description": "A synchronous outbound call to another service's operation.",
+      "required": ["targetService", "method", "path", "callSite"],
+      "properties": {
+        "targetService": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "operationId": { "type": "string" },
+        "method": { "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+        "path": { "type": "string", "pattern": "^/" },
+        "requestSchema": { "type": "string" },
+        "responseSchema": { "type": "string" },
+        "callSite": { "type": "string" }
+      }
+    },
+    "topicRef": {
+      "type": "object",
+      "required": ["topic", "messageSchema"],
+      "properties": {
+        "topic": { "type": "string" },
+        "messageSchema": { "type": "string" }
+      }
+    },
+    "datastore": {
+      "type": "object",
+      "required": ["kind", "name", "engine"],
+      "properties": {
+        "kind": { "enum": ["db", "cache"] },
+        "name": { "type": "string" },
+        "engine": { "type": "string" },
+        "tables": { "type": "array", "items": { "type": "string" } },
+        "regions": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: inventory-service
+  description: Tracks stock per SKU, reserves stock on request, consumes order.created and emits inventory.reserved.
+  annotations:
+    catalog.ganesh.dev/openapi: ./openapi.yaml
+    catalog.ganesh.dev/asyncapi: ./asyncapi.yaml
+spec:
+  type: service
+  lifecycle: production
+  owner: team-fulfillment
+  system: commerce
+  domain: fulfillment
+
+  providesApis:
+    - inventory-service-rest
+  consumesApis: []
+  dependsOn:
+    - resource:db/inventory
+    - resource:cache/sku-availability
+    - resource:topic/order.created
+    - resource:topic/inventory.reserved
+
+  x-catalog:
+    inboundApis:
+      - operationId: getInventory
+        method: GET
+        path: /api/inventory/{sku}
+        summary: Read current available stock for a SKU (cached).
+        responseSchema: InventoryResponse
+        errors:
+          - "404 NOT_FOUND"
+      - operationId: reserveInventory
+        method: POST
+        path: /api/inventory/reserve
+        summary: Reserve stock for an order; returns available=false when insufficient.
+        requestSchema: ReserveRequest
+        responseSchema: ReserveResponse
+        errors:
+          - "404 NOT_FOUND"
+    outboundApis: []
+    topicsProduced:
+      - topic: inventory.reserved
+        messageSchema: InventoryReservedEvent
+    topicsConsumed:
+      - topic: order.created
+        messageSchema: OrderCreatedEvent
+    datastores:
+      - kind: db
+        name: inventory
+        engine: postgres
+        tables:
+          - inventory
+          - reservations
+      - kind: cache
+        name: sku-availability
+        engine: caffeine
+        regions:
+          - sku-availability

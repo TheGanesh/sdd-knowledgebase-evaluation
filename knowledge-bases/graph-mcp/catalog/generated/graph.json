@@ -1,0 +1,86 @@
+{
+  "inventory-service" : {
+    "system" : "commerce",
+    "domain" : "fulfillment",
+    "owner" : "team-fulfillment",
+    "providesApis" : [ "inventory-service-rest" ],
+    "consumesApis" : [ ],
+    "dependsOn" : [ "resource:db/inventory", "resource:cache/sku-availability", "resource:topic/order.created", "resource:topic/inventory.reserved" ],
+    "inboundApis" : [ {
+      "operationId" : "getInventory",
+      "method" : "GET",
+      "path" : "/api/inventory/{sku}",
+      "summary" : "Read current available stock for a SKU (cached).",
+      "responseSchema" : "InventoryResponse",
+      "errors" : [ "404 NOT_FOUND" ]
+    }, {
+      "operationId" : "reserveInventory",
+      "method" : "POST",
+      "path" : "/api/inventory/reserve",
+      "summary" : "Reserve stock for an order; returns available=false when insufficient.",
+      "requestSchema" : "ReserveRequest",
+      "responseSchema" : "ReserveResponse",
+      "errors" : [ "404 NOT_FOUND" ]
+    } ],
+    "outboundApis" : [ ],
+    "topicsProduced" : [ "inventory.reserved" ],
+    "topicsConsumed" : [ "order.created" ],
+    "datastores" : [ {
+      "kind" : "db",
+      "name" : "inventory",
+      "engine" : "postgres",
+      "tables" : [ "inventory", "reservations" ]
+    }, {
+      "kind" : "cache",
+      "name" : "sku-availability",
+      "engine" : "caffeine",
+      "regions" : [ "sku-availability" ]
+    } ]
+  },
+  "order-service" : {
+    "system" : "commerce",
+    "domain" : "ordering",
+    "owner" : "team-ordering",
+    "providesApis" : [ "order-service-rest" ],
+    "consumesApis" : [ "inventory-service-rest" ],
+    "dependsOn" : [ "resource:db/orders", "resource:cache/plans", "resource:topic/order.created" ],
+    "inboundApis" : [ {
+      "operationId" : "createOrder",
+      "method" : "POST",
+      "path" : "/api/orders",
+      "summary" : "Create an order and synchronously reserve stock.",
+      "requestSchema" : "CreateOrderRequest",
+      "responseSchema" : "OrderResponse",
+      "errors" : [ "409 OUT_OF_STOCK", "404 NOT_FOUND" ]
+    }, {
+      "operationId" : "getOrder",
+      "method" : "GET",
+      "path" : "/api/orders/{id}",
+      "summary" : "Fetch an order by id.",
+      "responseSchema" : "OrderResponse",
+      "errors" : [ "404 NOT_FOUND" ]
+    } ],
+    "outboundApis" : [ {
+      "targetService" : "inventory-service",
+      "operationId" : "reserveInventory",
+      "method" : "POST",
+      "path" : "/api/inventory/reserve",
+      "requestSchema" : "ReserveRequest",
+      "responseSchema" : "ReserveResponse",
+      "callSite" : "com.ganesh.commerce.order.client.InventoryClient#reserve"
+    } ],
+    "topicsProduced" : [ "order.created" ],
+    "topicsConsumed" : [ ],
+    "datastores" : [ {
+      "kind" : "db",
+      "name" : "orders",
+      "engine" : "postgres",
+      "tables" : [ "orders" ]
+    }, {
+      "kind" : "cache",
+      "name" : "plans",
+      "engine" : "caffeine",
+      "regions" : [ "plans" ]
+    } ]
+  }
+}
